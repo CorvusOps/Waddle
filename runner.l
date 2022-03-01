@@ -2,8 +2,7 @@
 
 %{
 
-  #include "./lexer/symbol_table.h"
-  #include "./lexer/tok_type.h"
+  #include "./parser/validators/stmt.h"
   // #include "./structs/parse/grammar_validator.h"
   #include <stdlib.h>
   #include <stdio.h>
@@ -127,8 +126,8 @@ int main(int argc, char **argv)
     yylex();
     display_table=symbol_table;
     display_symbol_table(display_table);
-
-
+    run_with_stat(symbol_table);
+    display_syntax_table(symbol_table);
   } else {
     printf("Invalid extension. Please input files only with .wdl extension");
   }
