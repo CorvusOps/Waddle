@@ -18,7 +18,6 @@ int is_assignment_stmt(t_table** tok, p_tree** tree) {
         datatype = create_tree();
         status = is_datatype(tok, &datatype);
         if (status != SUBTREE_OK) {
-            free_parse_tree(datatype);
             return PARSING_ERROR;
         }
         (*tree)->child = datatype;
@@ -29,7 +28,6 @@ int is_assignment_stmt(t_table** tok, p_tree** tree) {
     var1 = create_tree();
     status = is_identifier(tok, &var1);
     if (status != SUBTREE_OK) {
-        free_parse_tree(var1);
         return PARSING_ERROR;
     }
     datatype->sibling = var1;
@@ -48,7 +46,6 @@ int is_assignment_stmt(t_table** tok, p_tree** tree) {
         eq = create_tree();
         status = is_assign(tok, &eq);
         if (status != SUBTREE_OK) {
-            free_parse_tree(eq);
             return PARSING_ERROR;
         }
         var1->sibling = eq;
@@ -56,7 +53,6 @@ int is_assignment_stmt(t_table** tok, p_tree** tree) {
         expression = create_tree();
         status = is_expression(tok, &expression);
         if (status != SUBTREE_OK) {
-            free_parse_tree(expression);
             return PARSING_ERROR;
         }
         eq->sibling = expression;
@@ -68,7 +64,6 @@ int is_assignment_stmt(t_table** tok, p_tree** tree) {
         eq = create_tree();
         status = is_crement(tok, &eq);
         if (status != SUBTREE_OK) {
-            free_parse_tree(eq);
             return PARSING_ERROR;
         }
         var1->sibling = eq;
@@ -76,7 +71,6 @@ int is_assignment_stmt(t_table** tok, p_tree** tree) {
         expression = create_tree();
         status = is_expression(tok, &expression);
         if (status != SUBTREE_OK) {
-            free_parse_tree(expression);
             return PARSING_ERROR;
         }
         eq->sibling = expression;
@@ -87,7 +81,6 @@ int is_assignment_stmt(t_table** tok, p_tree** tree) {
             comma = create_tree();
             status = is_comma(tok, &comma);
             if (status != SUBTREE_OK) {
-                free_parse_tree(var1);
                 return PARSING_ERROR;
             }
             var1->sibling = comma;
@@ -95,7 +88,6 @@ int is_assignment_stmt(t_table** tok, p_tree** tree) {
             var1 = create_tree();
             status = is_identifier(tok, &var1);
             if (status != SUBTREE_OK) {
-                free_parse_tree(var1);
                 return PARSING_ERROR;
             }
             comma->sibling = var1;
@@ -126,7 +118,6 @@ int is_input_stmt(t_table** tok, p_tree** tree) {
     assign = create_tree();
     status = is_assign(tok, &assign);
     if (status != SUBTREE_OK) {
-        free_parse_tree(assign);
         return PARSING_ERROR;
     }
     (*tree)->sibling = assign;
@@ -134,7 +125,6 @@ int is_input_stmt(t_table** tok, p_tree** tree) {
     input = create_tree();
     status = is_input(tok, &input);
     if (status != SUBTREE_OK) {
-        free_parse_tree(input);
         return status;
     }
     assign->child = input;
@@ -142,7 +132,6 @@ int is_input_stmt(t_table** tok, p_tree** tree) {
     open_par = create_tree();
     status = is_open_par(tok, &open_par);
     if (status != SUBTREE_OK) {
-        free_parse_tree(open_par);
         return PARSING_ERROR;
     }
     input->sibling = open_par;
@@ -151,7 +140,6 @@ int is_input_stmt(t_table** tok, p_tree** tree) {
         obj = create_tree();
         status = is_obj(tok, &obj);
         if (status != SUBTREE_OK) {
-            free_parse_tree(open_par);
             return PARSING_ERROR;
         }
         open_par->sibling = obj;
@@ -160,7 +148,6 @@ int is_input_stmt(t_table** tok, p_tree** tree) {
     close_par = create_tree();
     status = is_close_par(tok, &close_par);
     if (status != SUBTREE_OK) {
-        free_parse_tree(close_par);
         return PARSING_ERROR;
     }
     open_par->sibling = close_par;
@@ -186,7 +173,6 @@ int is_output_stmt(t_table** tok, p_tree** tree) {
     print = create_tree();
     status = is_print(tok, &print);
     if (status != SUBTREE_OK) {
-        free_parse_tree(print);
         return status;
     }
     (*tree)->child = print;
@@ -194,7 +180,6 @@ int is_output_stmt(t_table** tok, p_tree** tree) {
     open_par = create_tree();
     status = is_open_par(tok, &open_par);
     if (status != SUBTREE_OK) {
-        free_parse_tree(print);
         return status;
     }
     print->child = open_par;
@@ -204,7 +189,6 @@ int is_output_stmt(t_table** tok, p_tree** tree) {
         obj = create_tree();
         status = is_str_concat(tok, &obj);
         if (status != SUBTREE_OK) {
-            free_parse_tree(obj);
             return status;
         }
         print->sibling = obj;
@@ -214,7 +198,6 @@ int is_output_stmt(t_table** tok, p_tree** tree) {
         obj = create_tree();
         status = is_obj(tok, &obj);
         if (status != SUBTREE_OK) {
-            free_parse_tree(obj);
             return status;
         }
         print->sibling = obj;
@@ -223,7 +206,6 @@ int is_output_stmt(t_table** tok, p_tree** tree) {
     close_par = create_tree();
     status = is_close_par(tok, &close_par);
     if (status != SUBTREE_OK) {
-        free_parse_tree(print);
         return status;
     }
     open_par->child = close_par;
@@ -266,11 +248,12 @@ int is_line(t_table** tok, p_tree** line) {
         *tok = curr->next_tok;
         status = SUBTREE_OK;
     } else {
-        printf("SYNTAX ERROR: No grammar match rule.");
+        printf("SYNTAX ERROR: No grammar match rule.\n");
         status = PARSING_ERROR;
     }
 
     (*line)->child = subtree;
+    printf("Curr line to return here and lexeme %d, %s\n", curr->line, curr->lexeme);
     return status;
 }
 
@@ -307,23 +290,20 @@ int is_program(t_table** head, p_tree** tree) {
             } else {
                 current->sibling = line;
             }
-
-            if (status == MEMORY_ERROR) {
-                printf("Program Out of Memory.\n");
-                return MEMORY_ERROR;
-            }
     
             if (status == PARSING_ERROR) {
                 lineNo = temp_list->line;
+                printf("line: %d\n", lineNo);
                 while (temp_list->line == lineNo) {
+                    printf("line inside loop: %d\n", temp_list->line);
                     temp_list = temp_list->next_tok;
                 }
             }
         }
-        
+        printf("Does it enter here?");
         return SUBTREE_OK;
     }
-    
+    printf("OR  enter here?");
     return MEMORY_ERROR;
     
 }
@@ -338,5 +318,6 @@ void run_with_stat(t_table* head) {
 
     status = is_program(&head, &tree);
     printf("STATUS RETURNED HERE: %d\n", status);
+    display_syntax_table(prog_tb);
     
 }

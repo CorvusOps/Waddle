@@ -127,7 +127,7 @@ int main(int argc, char **argv)
     display_table=symbol_table;
     display_symbol_table(display_table);
     run_with_stat(symbol_table);
-    display_syntax_table(symbol_table);
+
   } else {
     printf("Invalid extension. Please input files only with .wdl extension");
   }

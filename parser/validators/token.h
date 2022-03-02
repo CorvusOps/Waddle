@@ -105,7 +105,7 @@ int tok_validator (t_table** tok, p_tree** tree, int type, char* lexeme) {
     if (current->type != type) {
         snprintf(message, sizeof(message),"PARSER ERROR: In line %d. Expecting <%s>, Found <%s>\n", current->line, type2char(type), type2char(current->type));
         current->message = message;
-        *tok = current->next_tok;
+        printf("THE message: %s\n", current->message);
         return PARSING_ERROR;
     }
 
@@ -113,11 +113,11 @@ int tok_validator (t_table** tok, p_tree** tree, int type, char* lexeme) {
         if(strcmp(current->lexeme, lexeme) != 0) {
             snprintf(message, sizeof(message),"Expecting %s, Found %s\n", lexeme, current->lexeme);
             current->message = message;
-            *tok = current->next_tok;
             return PARSING_ERROR;
         }
     
     *tree = create_tree_entry(current->lexeme, current->type, current->line);
+    current->message = "";
     *tok = current->next_tok;
     
     return SUBTREE_OK;
@@ -461,7 +461,6 @@ int is_number(t_table** tok, p_tree** tree) {
         has_sign = 0;
 
     if (status != SUBTREE_OK) {
-        free_parse_tree(sign);
         return status;
     }
 
@@ -477,7 +476,7 @@ int is_number(t_table** tok, p_tree** tree) {
         status = is_dec_const(tok, &numeric);
     
     if (status != SUBTREE_OK)
-        free_parse_tree(numeric);
+        return PARSING_ERROR;
     else {
         if (has_sign)
             sign->sibling = numeric;
@@ -576,7 +575,6 @@ int is_quoted_string(t_table** tok, p_tree** tree) {
     // Set the Char Seq as the initial child
     status = is_char_seq(tok, &char_seq);
     if (status != SUBTREE_OK) {
-        free_parse_tree(char_seq);
         return status;
     }
 
@@ -611,7 +609,6 @@ int is_quoted_string(t_table** tok, p_tree** tree) {
         comma = create_tree();
         status = is_comma(tok, &comma);
         if (status != SUBTREE_OK) {
-            free_parse_tree(comma);
             break;
         }
 
@@ -622,7 +619,6 @@ int is_quoted_string(t_table** tok, p_tree** tree) {
         obj = create_tree();
         status = is_obj(tok, &obj);
         if (status != SUBTREE_OK) {
-            free_parse_tree(obj);
             break;
         }
         
@@ -657,7 +653,6 @@ int is_str_concat (t_table** tok, p_tree** tree) {
     quotedstr = create_tree();
     status = is_quoted_string(tok, &quotedstr);
     if (status != SUBTREE_OK) {
-        free_parse_tree(quotedstr);
         return status;
     }
     (*tree)->child = quotedstr;
@@ -666,7 +661,6 @@ int is_str_concat (t_table** tok, p_tree** tree) {
     if ((*tok)->type == ENDLINE)
         status = is_endline(tok, &endline);
         if (status != SUBTREE_OK) {
-            free_parse_tree(endline);
             return status;
         }
         last->sibling = endline;
@@ -677,7 +671,6 @@ int is_str_concat (t_table** tok, p_tree** tree) {
         plus = create_tree();
         status = is_plus(tok, &plus);
         if (status != SUBTREE_OK) {
-            free_parse_tree(plus);
             return status;
         }
         last->sibling = plus;
@@ -686,7 +679,6 @@ int is_str_concat (t_table** tok, p_tree** tree) {
         obj = create_tree();
         status = is_obj(tok, &obj);
         if (status != SUBTREE_OK) {
-            free_parse_tree(obj);
             return status;
         }
         last->sibling = obj;
@@ -697,7 +689,6 @@ int is_str_concat (t_table** tok, p_tree** tree) {
     if ((*tok)->type == ENDLINE)
         status = is_endline(tok, &endline);
         if (status != SUBTREE_OK) {
-            free_parse_tree(endline);
             return status;
         }
         last->sibling = endline;

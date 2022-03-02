@@ -98,23 +98,21 @@ void display_syntax_table(t_table* table)
 	t_table* traverser;
     int line;
     char *messageAgg, *tokenAgg, *token, *validity;
-	FILE *writeParsed=fopen("syntax_table.txt","w+");
-    
-	fprintf(writeParsed,"\t\tline\t\tstatement\t\tvalidity\t\tmessage\n");
+	
+	
 
     traverser = table;
     tokenAgg = "";
 
+    printf("does display contain any? %d",traverser->line);
+
 	while( traverser != NULL )
 	{
-        line = traverser->line;
-        *tokenAgg++ =  *(traverser->lexeme);
-        printf("TOKEN AGG:%s\n", tokenAgg);
+            printf("\t%d\t%s\t%s\n",traverser->line, traverser->lexeme, traverser->message);
         
 		traverser = traverser->next_tok;
 	}
    
-	fclose(writeParsed);
 }
 
 

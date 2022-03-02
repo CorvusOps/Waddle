@@ -29,7 +29,6 @@ int is_base_expr (t_table** tok, p_tree** tree) {
         lpar = create_tree();
         status = is_open_par(tok, &lpar);
         if (status != SUBTREE_OK){
-            free_parse_tree(lpar);
             return status;
         }
         (*tree)->child = lpar;
@@ -38,7 +37,6 @@ int is_base_expr (t_table** tok, p_tree** tree) {
         subexpr = create_tree();
         status = is_expression(tok, &subexpr);
         if (status != SUBTREE_OK){
-            free_parse_tree(subexpr);
             return status;
         }
         lpar->sibling = subexpr;
@@ -47,7 +45,6 @@ int is_base_expr (t_table** tok, p_tree** tree) {
         rpar = create_tree();
         status = is_close_par(tok, &rpar);
         if (status != SUBTREE_OK){
-            free_parse_tree(rpar);
             return status;
         }
         subexpr->sibling = rpar;
@@ -60,7 +57,6 @@ int is_base_expr (t_table** tok, p_tree** tree) {
         obj = create_tree();
         status = is_obj(tok, &obj);
         if (status != SUBTREE_OK) {
-            free_parse_tree(obj);
             return status;
         }
         (*tree)->child = obj;
@@ -85,7 +81,6 @@ int is_term (t_table** tok, p_tree** tree) {
     base = create_tree();
     status = is_base_expr(tok, &base);
     if (status != SUBTREE_OK){
-        free_parse_tree(base);
         return status;
     }
     (*tree)->child = base;
@@ -97,7 +92,6 @@ int is_term (t_table** tok, p_tree** tree) {
         op = create_tree();
         status = is_operator(tok, &op);
         if (status != SUBTREE_OK){
-            free_parse_tree(op);
             return status;
         }
         base->sibling = op;
@@ -105,7 +99,6 @@ int is_term (t_table** tok, p_tree** tree) {
         term = create_tree();
         status = is_term(tok, &term);
         if (status != SUBTREE_OK){
-            free_parse_tree(term);
             return status;
         }
         op->sibling = term;
@@ -129,7 +122,6 @@ int is_predicate (t_table** tok, p_tree** tree) {
     term = create_tree();
     status = is_term(tok, &term);
     if (status != SUBTREE_OK){
-        free_parse_tree(term);
         return status;
     }
     (*tree)->child = term;
@@ -142,7 +134,6 @@ int is_predicate (t_table** tok, p_tree** tree) {
         op = create_tree();
         status = is_operator(tok, &op);
         if (status != SUBTREE_OK){
-            free_parse_tree(op);
             return status;
         }
         term->sibling = op;
@@ -150,7 +141,6 @@ int is_predicate (t_table** tok, p_tree** tree) {
         pred = create_tree();
         status = is_predicate(tok, &pred);
         if (status != SUBTREE_OK){
-            free_parse_tree(pred);
             return status;
         }
         op->sibling = pred;
@@ -176,7 +166,6 @@ int is_expression (t_table** tok, p_tree** tree) {
     pred = create_tree();
     status = is_predicate(tok, &pred);
     if (status != SUBTREE_OK){
-        free_parse_tree(pred);
         return status;
     }
     (*tree)->child = pred;
@@ -188,7 +177,6 @@ int is_expression (t_table** tok, p_tree** tree) {
         op = create_tree();
         status = is_operator(tok, &op);
         if (status != SUBTREE_OK){
-            free_parse_tree(op);
             return status;
         }
         pred->sibling = op;
@@ -197,7 +185,6 @@ int is_expression (t_table** tok, p_tree** tree) {
         expr = create_tree();
         status = is_expression(tok, &expr);
         if (status != SUBTREE_OK){
-            free_parse_tree(expr);
             return status;
         }
         op->sibling = expr;
