@@ -37,7 +37,7 @@ int is_assignment_stmt(t_table** tok, p_tree** tree) {
         return status;
     }
 
-    if(curr->type == ASSIGN && curr->next_tok->type == Hey) {
+    if((*tok)->type == ASSIGN && (*tok)->next_tok->type == Hey) {
         is_input_stmt(tok, &eq);
     }
 
@@ -56,6 +56,13 @@ int is_assignment_stmt(t_table** tok, p_tree** tree) {
             return PARSING_ERROR;
         }
         eq->sibling = expression;
+
+        endline = create_tree();
+        status = is_endline(tok, &endline);
+        if (status != SUBTREE_OK) {
+            return PARSING_ERROR;
+        }
+        expression->sibling = endline;
 
         return status;
     }
@@ -93,6 +100,13 @@ int is_assignment_stmt(t_table** tok, p_tree** tree) {
             comma->sibling = var1;
             curr = *tok;
         }
+        endline = create_tree();
+        status = is_endline(tok, &endline);
+        if (status != SUBTREE_OK) {
+            return PARSING_ERROR;
+        }
+        var1->sibling = endline;
+
         return status;
     }
 
@@ -152,10 +166,12 @@ int is_input_stmt(t_table** tok, p_tree** tree) {
     }
     open_par->sibling = close_par;
 
+    /*
     endline = create_tree();
     status = is_endline(tok, &endline);
     close_par->sibling = endline;
-
+    */
+    
     return SUBTREE_OK;
 }
 
@@ -244,6 +260,16 @@ int is_line(t_table** tok, p_tree** line) {
         status = is_input_stmt(tok, &subtree);
     } else if (curr->type == Print) {
         status = is_output_stmt(tok, &subtree);
+    } else if (curr->type == If){
+        status = is_if_stmt(tok,&subtree);
+    } else if (curr->type == Elif){
+        status = is_elif_stmt(tok,&subtree);
+    } else if (curr->type == Else){
+        status = is_else_stmt(tok,&subtree);
+    } else if (curr->type == While) {
+        status = is_while_loop(tok, &subtree);
+    } else if (curr->type == For){
+        status = is_for_loop(tok, &subtree);
     } else if (curr->type == BLOCK_COMMENT) {
         *tok = curr->next_tok;
         status = SUBTREE_OK;
@@ -306,6 +332,397 @@ int is_program(t_table** head, p_tree** tree) {
     printf("OR  enter here?");
     return MEMORY_ERROR;
     
+}
+
+
+int is_if_stmt(t_table** tok, p_tree** tree){
+    p_tree *if_kywrd, *open_par, *expression, *close_par, *open_curl, *endline, *body, *close_curl;
+    int status;
+
+    if (( *tree = create_tree_entry("IF_CON", OUTPUT_CON, 0) ) == NULL ) {
+        printf("MEMORY ERR: if condition container not created.\n");
+        return MEMORY_ERROR;
+    }
+
+    if_kywrd = create_tree();
+    status = is_if(tok, &if_kywrd);
+    if (status != SUBTREE_OK) {
+        return status;
+    }
+    (*tree)->child = if_kywrd;
+
+    open_par = create_tree();
+    status = is_open_par(tok, &open_par);
+    if (status != SUBTREE_OK) {
+        return status;
+    }
+    if_kywrd->sibling = open_par;
+
+    expression = create_tree();
+    status = is_expression(tok, &expression);
+    if (status != SUBTREE_OK) {
+        return status;
+    }
+    open_par->sibling = expression;
+
+    close_par = create_tree();
+    status = is_close_par(tok, &close_par);
+    if (status != SUBTREE_OK) {
+        return status;
+    }
+    expression->sibling = close_par;
+
+    open_curl = create_tree();
+    status = is_open_curl(tok, &open_curl);
+    if (status != SUBTREE_OK) {
+        return status;
+    }
+    close_par->sibling = open_curl;
+
+    /*
+    endline = create_tree();
+    status = is_endline(tok, &endline);
+    if (status != SUBTREE_OK) {
+        return status;
+    }
+    open_curl->sibling = endline;
+    */
+
+    body = create_tree();
+    status = is_block(tok, &body, CLOSE_CURL);
+    if (status != SUBTREE_OK) {
+        return status;
+    }
+    open_curl->sibling = body;
+
+    close_curl = create_tree();
+    status = is_close_curl(tok, &close_curl);
+    if (status != SUBTREE_OK) {
+        return status;
+    }
+    body->sibling = close_curl;
+}
+
+int is_elif_stmt(t_table** tok, p_tree** tree) {
+    p_tree *elif, *open_par, *expression, *close_par, *open_curl, *endline, *body, *close_curl;
+    int status;
+
+    if (( *tree = create_tree_entry("ELSEIF_CON", OUTPUT_CON, 0) ) == NULL) {
+        //printf("MEMORY ERR: elseif container not created.\n");
+        return MEMORY_ERROR;
+    }
+
+    elif = create_tree();
+    status = is_elif(tok, &elif);
+    if (status != SUBTREE_OK) {
+        return status;
+    }
+    (*tree)->child = elif;
+
+    open_par = create_tree();
+    status = is_open_par(tok, &open_par);
+    if (status != SUBTREE_OK) {
+        return status;
+    }
+    elif->sibling = open_par;
+
+    expression = create_tree();
+    status = is_expression(tok, &expression);
+    if (status != SUBTREE_OK) {
+        return status;
+    }
+    open_par->sibling = expression;
+
+    close_par = create_tree();
+    status = is_close_par(tok, &close_par);
+    if (status != SUBTREE_OK) {
+        return status;
+    }
+    expression->sibling = close_par;
+
+    open_curl = create_tree();
+    status = is_open_curl(tok, &open_curl);
+    if (status != SUBTREE_OK) {
+        return status;
+    }
+    close_par->sibling = open_curl;
+
+    /*
+    endline = create_tree();
+    status = is_endline(tok, &endline);
+    if (status != SUBTREE_OK) {
+        return status;
+    }
+    open_curl->sibling = endline;
+    */
+
+    body = create_tree();
+    status = is_block(tok, &body, CLOSE_CURL);
+    if (status != SUBTREE_OK) {
+        return status;
+    }
+    open_curl->sibling = body;
+
+    close_curl = create_tree();
+    status = is_close_curl(tok, &close_curl);
+    if (status != SUBTREE_OK) {
+        return status;
+    }
+    body->sibling = close_curl;
+}
+
+int is_else_stmt(t_table** tok, p_tree** tree) {
+    p_tree *else_kywrd, *open_curl, *endline, *body, *close_curl;
+    int status;
+    
+    if (( *tree = create_tree_entry("ELSE CON", OUTPUT_CON, 0) ) == NULL) {
+        printf("MEMORY ERR: else statement contatiner not created.\n");
+        return MEMORY_ERROR;
+    }
+
+    else_kywrd = create_tree();
+    status = is_else(tok, &else_kywrd);
+    if (status != SUBTREE_OK) {
+        return status;
+    }
+    (*tree)->child = else_kywrd;
+    
+    /*
+    endline = create_tree();
+    status = is_endline(tok, &endline);
+    if (status != SUBTREE_OK) {
+        return status;
+    }
+    else_kywrd->sibling = endline;
+    */
+
+    open_curl = create_tree();
+    status = is_open_curl(tok, &open_curl);
+    if (status != SUBTREE_OK) {
+        return status;
+    }
+    body->sibling = open_curl;
+    
+    body = create_tree();
+    status = is_block(tok, &body, CLOSE_CURL);
+    if (status != SUBTREE_OK) {
+        return status;
+    }
+    else_kywrd->sibling = body;
+
+    close_curl = create_tree();
+    status = is_close_curl(tok, &close_curl);
+    if (status != SUBTREE_OK) {
+        return status;
+    }
+    body->sibling = close_curl;
+
+}
+
+int is_while_loop(t_table** tok, p_tree** tree) {
+    p_tree *while_kywrd, *open_par, *expression, *close_par, *open_curl, *endline, *body, *close_curl;
+    int status;
+
+    if (( *tree = create_tree_entry("WHILE_CON", OUTPUT_CON, 0) ) == NULL ) {
+        printf("MEMORY ERR: while loop container not created.\n");
+        return MEMORY_ERROR;
+    }
+
+    while_kywrd = create_tree();
+    status = is_while(tok, &while_kywrd);
+    if (status != SUBTREE_OK) {
+        return status;
+    }
+    (*tree)->child = while_kywrd;
+
+    open_par = create_tree();
+    status = is_open_par(tok, &open_par);
+    if (status != SUBTREE_OK) {
+        return status;
+    }
+    while_kywrd->sibling = open_par;
+
+    expression = create_tree();
+    status = is_expression(tok, &expression);
+    if (status != SUBTREE_OK) {
+        return status;
+    }
+    open_par->sibling = expression;
+
+    close_par = create_tree();
+    status = is_close_par(tok, &close_par);
+    if (status != SUBTREE_OK) {
+        return status;
+    }
+    expression->sibling = close_par;
+
+    open_curl = create_tree();
+    status = is_open_curl(tok, &open_curl);
+    if (status != SUBTREE_OK) {
+        return status;
+    }
+    close_par->sibling = open_curl;
+
+    /*endline = create_tree();
+    status = is_endline(tok, &endline);
+    if (status != SUBTREE_OK) {
+        free_parse_tree(endline);
+        return status;
+    }
+    open_curl->sibling = endline;*/
+
+    body = create_tree();
+    status = is_block(tok, &body, CLOSE_CURL);
+    if (status != SUBTREE_OK) {
+        return status;
+    }
+    open_curl->sibling = body;
+
+    close_curl = create_tree();
+    status = is_close_curl(tok, &close_curl);
+    if (status != SUBTREE_OK) {
+        return status;
+    }
+    body->sibling = close_curl;
+}
+
+int is_for_loop(t_table** tok, p_tree** tree){
+    p_tree *for_keyword, *open_par, *expression, *close_par, *open_curl, *body, *close_curl;
+
+    t_table *curr;
+    
+    int status;
+    
+    if (( *tree = create_tree_entry("For", OUTPUT_CON, 0) ) == NULL ) {
+        printf("MEMORY ERR: for loop container not created.\n");
+        return MEMORY_ERROR;
+    }
+    for_keyword = create_tree();
+    status = is_for(tok, &for_keyword);
+    if (status != SUBTREE_OK){
+        return status;
+    }
+
+    (*tree)->child = for_keyword;
+
+    open_par = create_tree();
+    status = is_open_par(tok, &open_par);
+    if (status != SUBTREE_OK)
+    {
+        return status;
+    }
+
+    for_keyword->sibling = open_par;
+    
+    expression = create_tree();
+    status = is_expression(tok, &expression);
+    if (status != SUBTREE_OK)
+    {
+        return status;
+    }
+    
+    open_par->sibling = expression;
+    
+    close_par = create_tree();
+    status = is_close_par(tok, &close_par);
+    if (status != SUBTREE_OK)
+    {
+        return status;
+    }
+    
+    expression->sibling = close_par;  
+
+    open_curl = create_tree();
+    status = is_open_curl(tok, &open_curl);
+    if (status != SUBTREE_OK)
+    {
+        return status;
+    }
+    
+    close_par->sibling = open_curl; 
+
+    body = create_tree();
+    status = is_block(tok, &body, CLOSE_CURL);//replace with is_block
+    if (status != SUBTREE_OK)
+    {
+        return status;
+    }
+    open_curl->sibling = body; 
+
+    close_curl = create_tree();
+    status = is_close_curl(tok, &close_curl);
+    if (status != SUBTREE_OK)
+    {
+        return status;
+    }
+    
+    body->sibling = close_curl; 
+  
+    return status;
+   
+}
+
+int is_block(t_table** tok, p_tree** tree, int terminator){
+    int status;
+    t_table *curr;
+    
+    if (( *tree = create_tree_entry("BLOCK_CON", OUTPUT_CON, 0) ) == NULL ) {
+        printf("MEMORY ERR: block container not created.\n");
+        return MEMORY_ERROR;
+    }
+
+    curr = *tok;
+
+    while (curr->type != terminator){
+        p_tree *line, *end_line;
+
+        line = create_tree();
+
+        if ((*tok)->next_tok == NULL){
+            return status;
+        }
+
+        status = is_line(tok, &line);
+
+        if (status != SUBTREE_OK) {
+            if ((*tok)->next_tok == NULL){
+                char *terminator_str = "";
+                switch (terminator)
+                {
+                    case CLOSE_CURL:
+                        terminator_str = "}";
+                        break;
+                    case DELIMITER:
+                        terminator_str = "DELIMITER";
+                        break; 
+                }
+                printf(" Expected %s.", terminator_str);
+            }
+            //free_parse_tree(line);
+            
+            return status;
+        }
+
+        (*tree)->child = line;
+
+        if ((*tok)->next_tok == NULL){
+            return status;
+        }
+        
+        /*
+        end_line = create_tree();
+        status = is_endline(tok, &end_line);
+        if (status != SUBTREE_OK) {
+            free_parse_tree(end_line);
+            return status;
+        }
+        line->sibling = end_line;
+        */
+        curr = *tok;
+
+    }
+
+    return status;
 }
 
 
