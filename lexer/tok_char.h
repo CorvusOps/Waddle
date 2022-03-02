@@ -3,7 +3,7 @@
 
 #include "./tok_type.h"
 
-const char* type2char (enum TokenType t) {
+const char* type2char (int t) {
     switch (t)
     {
         case Char: return "Char";
@@ -52,6 +52,7 @@ const char* type2char (enum TokenType t) {
         case CLOSE_PAR: return ")";
         case OPEN_CURL: return "{";
         case CLOSE_CURL: return "}";
+        case CONCAT: return "CONCAT";
         case HEX_CONSTANT: return "HEX";
         case INT_CONSTANT: return "Integer";
         case DEC_CONSTANT: return "Float Number";
