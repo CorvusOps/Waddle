@@ -20,6 +20,7 @@ struct token_table
 	char* tok_name;
 	int line;
 	char * message;
+	int valid;
 	struct token_table* next_tok;
 };
 

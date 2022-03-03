@@ -125,7 +125,6 @@ int main(int argc, char **argv)
     symbol_table=create_symbol_table();
     yylex();
     display_table=symbol_table;
-    display_symbol_table(display_table);
     run_with_stat(symbol_table);
 
   } else {

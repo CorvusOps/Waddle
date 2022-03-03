@@ -96,22 +96,48 @@ void print_parse_tree(p_tree* tree) {
 void display_syntax_table(t_table* table)
 {
 	t_table* traverser;
-    int line;
-    char *messageAgg, *tokenAgg, *token, *validity;
+    int line = 1, is_valid =1;
+    char *messageAgg, *tokenAgg, *token ;
 	
-	
-
     traverser = table;
     tokenAgg = "";
 
-    printf("does display contain any? %d",traverser->line);
-
+    FILE *syntax;
+    syntax = fopen("syntaxTable.txt","w"); 
+	fprintf(syntax,"lineNo token\tvalidity\t\tmessage\n");
+    
+    messageAgg = (char *) malloc(10);
+    strcpy(messageAgg, "");
+    fclose(syntax);
 	while( traverser != NULL )
-	{
-            printf("\t%d\t%s\t%s\n",traverser->line, traverser->lexeme, traverser->message);
+	{   
+        syntax = fopen("syntaxTable.txt","a+"); 
+        fprintf(syntax,"\t%d\t%s\n",traverser->line, traverser->lexeme);
+        fclose(syntax);
+        if (traverser->valid == 0) {
+            is_valid = 0;
+            messageAgg = (char *) realloc(messageAgg, 200);
+            strcat(messageAgg, traverser->message);
+        }
         
+        if (traverser->next_tok->line > line || traverser->next_tok == NULL)  {
+            if (is_valid == 1) {
+                syntax = fopen("syntaxTable.txt","a+");
+                fprintf(syntax,"%d\t%s\t\t%s\t%s\n",traverser->line, traverser->lexeme,"valid", "No Errors.");
+                fclose(syntax);
+            } else {
+                syntax = fopen("syntaxTable.txt","a+");
+                fprintf(syntax,"\t%d\t%s\t\t%s\t%s\n",traverser->line, traverser->lexeme,"invalid", messageAgg);
+                fclose(syntax);
+            }
+            line++;
+            is_valid = 1;
+        }
+        
+
 		traverser = traverser->next_tok;
 	}
+    
    
 }
 
