@@ -97,27 +97,27 @@ int tok_validator (t_table** tok, p_tree** tree, int type, char* lexeme) {
     printf("Sa Validator: %d, %d\n", current->type, type);
 
     if (current->type == INVALID) {
-        snprintf(message, sizeof(message), "PARSER ERROR: In line %d, %s\n", current->line, current->message);
-        current->message = message;
-        *tok = current->next_tok;
+        current->message = (char *) malloc(200);
+        current->valid = 0;
+        snprintf(current->message, 200, "PARSER ERROR: In line %d, %s\n", current->line, current->message);
         return PARSING_ERROR;
     }
     if (current->type != type) {
-        snprintf(message, sizeof(message),"PARSER ERROR: In line %d. Expecting <%s>, Found <%s>\n", current->line, type2char(type), type2char(current->type));
-        current->message = message;
-        printf("THE message: %s\n", current->message);
+        current->message = (char *) malloc(200);
+        current->valid = 0;
+        snprintf(current->message, 200,"PARSER ERROR: In line %d. Expecting <%s>, Found <%s>\n", current->line, type2char(type), type2char(current->type));
         return PARSING_ERROR;
     }
 
     if (lexeme != NULL)
         if(strcmp(current->lexeme, lexeme) != 0) {
-            snprintf(message, sizeof(message),"Expecting %s, Found %s\n", lexeme, current->lexeme);
-            current->message = message;
+            current->message = (char *) malloc(200);
+            snprintf(current->message, 200,"Expecting %s, Found %s\n", lexeme, current->lexeme);
             return PARSING_ERROR;
         }
     
     *tree = create_tree_entry(current->lexeme, current->type, current->line);
-    current->message = "";
+    current->valid = 1;
     *tok = current->next_tok;
     
     return SUBTREE_OK;
